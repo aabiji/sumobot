@@ -4,9 +4,9 @@
 
 const int LEFT = 0;
 const int RIGHT = 1;
-const int FRONT = 2;
-const int BACK = 3;
-const int SIDES = 4;
+//const int FRONT = 2;
+//const int BACK = 3;
+const int SIDES = 2;
 int ir_sensors[SIDES];
 
 Adafruit_MotorShield AFMS;
@@ -52,8 +52,8 @@ void stop_moving() {
   left->setSpeed(0);
 }
 
-bool see_black(int direction) {
-  return digitalRead(ir_sensors[direction]) == 1;
+bool see_white(int direction) {
+  return digitalRead(ir_sensors[direction]) == 0;
 }
 
 void setup() {
@@ -67,31 +67,47 @@ void setup() {
   // for example...
   ir_sensors[LEFT] = 9;
   ir_sensors[RIGHT] = 10;
-  ir_sensors[FRONT] = 11;
-  ir_sensors[BACK] = 12;
+  //ir_sensors[FRONT] = 11;
+  //ir_sensors[BACK] = 12;
   for (int i = 0; i < SIDES; i++) {
     pinMode(ir_sensors[i], INPUT);
   }
 }
 
+// https://pundit.pratt.duke.edu/wiki/ECE_110/Equipment/QTI
+long rcTime(int pin) {
+  pinMode(pin, OUTPUT);    // Sets pin as OUTPUT
+  digitalWrite(pin, HIGH); // Pin HIGH
+  delay(1);                // Waits for 1 millisecond
+  pinMode(pin, INPUT);     // Sets pin as INPUT
+  digitalWrite(pin, LOW);  // Pin LOW
+  long time = micros();    // Tracks starting time
+  while(digitalRead(pin)); // Loops while voltage is high
+  time = micros() - time;  // Calculate decay time
+  return time;             // Return decay time
+}
+
 void loop() {
+  /*
   int speed = 50;
 
   // Idea for avoiding the white boundary lines...
-  while (see_black(BACK)) {
-    move_forward(speed, 1);
+  //while (see_white(BACK)) {
+  //  move_forward(speed, 1);
+  //}
+  //while (see_white(FRONT)) {
+  //  move_backward(speed, 1);
+  //}
+  while (see_white(LEFT)) {
+    Serial.println("left is white");
+    //turn_right(speed, 1);
   }
-  while (see_black(FRONT)) {
-    move_backward(speed, 1);
+  while (see_white(RIGHT)) {
+    Serial.println("right is white");
+    //turn_left(speed, 1);
   }
-  while (see_black(LEFT)) {
-    Serial.println("hello??");
-    turn_right(speed, 1);
-  }
-  while (see_black(RIGHT)) {
-    turn_left(speed, 1);
-  }
-
+  */
+  Serial.println(rcTime());
   /*
   Ideas for strategies:
   - spin in a circle quickly towards the opponent
