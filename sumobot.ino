@@ -52,30 +52,22 @@ void stop_moving() {
   left->setSpeed(0);
 }
 
-bool see_white(int direction) {
-  return digitalRead(ir_sensors[direction]) == 0;
-}
+int irSensorPin = 5;
 
 void setup() {
   Serial.begin(9600);
+
+  pinMode(irSensorPin, INPUT);
 
   AFMS = Adafruit_MotorShield();
   AFMS.begin();
   left = AFMS.getMotor(2);
   right = AFMS.getMotor(3);
-
-  // for example...
-  ir_sensors[LEFT] = 9;
-  ir_sensors[RIGHT] = 10;
-  //ir_sensors[FRONT] = 11;
-  //ir_sensors[BACK] = 12;
-  for (int i = 0; i < SIDES; i++) {
-    pinMode(ir_sensors[i], INPUT);
-  }
 }
 
 // https://pundit.pratt.duke.edu/wiki/ECE_110/Equipment/QTI
-long rcTime(int pin) {
+// B -> GND, W -> 5v, R -> pin 
+long qti_is_white(int pin) {
   pinMode(pin, OUTPUT);    // Sets pin as OUTPUT
   digitalWrite(pin, HIGH); // Pin HIGH
   delay(1);                // Waits for 1 millisecond
@@ -84,7 +76,7 @@ long rcTime(int pin) {
   long time = micros();    // Tracks starting time
   while(digitalRead(pin)); // Loops while voltage is high
   time = micros() - time;  // Calculate decay time
-  return time;             // Return decay time
+  return time <= 100;
 }
 
 void loop() {
@@ -107,7 +99,14 @@ void loop() {
     //turn_left(speed, 1);
   }
   */
-  Serial.println(rcTime());
+  // TODO: how many sensors can we connect at once?? we're running out of 5v pins!
+  int sensorValue = digitalRead(irSensorPin);
+  if (sensorValue == LOW) {
+    Serial.println("Obstacle detected!");
+  } else {
+    Serial.println("No obstacle.");
+  }
+
   /*
   Ideas for strategies:
   - spin in a circle quickly towards the opponent
