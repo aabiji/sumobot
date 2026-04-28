@@ -2,13 +2,6 @@
 #include <Adafruit_MotorShield.h>
 #include <utility/Adafruit_MS_PWMServoDriver.h>
 
-const int LEFT = 0;
-const int RIGHT = 1;
-//const int FRONT = 2;
-//const int BACK = 3;
-const int SIDES = 2;
-int ir_sensors[SIDES];
-
 Adafruit_MotorShield AFMS;
 Adafruit_DCMotor *left;
 Adafruit_DCMotor *right;
@@ -52,12 +45,18 @@ void stop_moving() {
   left->setSpeed(0);
 }
 
-int irSensorPin = 5;
+// NOTE: This must correspond to the pins we attached the OUT wires to on the arduino
+int qti_sensor1 = 4;
+int qti_sensor2 = 6;
+
+int blue_sensor1 = 7;
+int blue_sensor2 = 5;
 
 void setup() {
   Serial.begin(9600);
 
-  pinMode(irSensorPin, INPUT);
+  pinMode(blue_sensor1, INPUT);
+  pinMode(blue_sensor2, INPUT);
 
   AFMS = Adafruit_MotorShield();
   AFMS.begin();
@@ -67,7 +66,7 @@ void setup() {
 
 // https://pundit.pratt.duke.edu/wiki/ECE_110/Equipment/QTI
 // B -> GND, W -> 5v, R -> pin 
-long qti_is_white(int pin) {
+bool qti_is_white(int pin) {
   pinMode(pin, OUTPUT);    // Sets pin as OUTPUT
   digitalWrite(pin, HIGH); // Pin HIGH
   delay(1);                // Waits for 1 millisecond
@@ -79,10 +78,36 @@ long qti_is_white(int pin) {
   return time <= 100;
 }
 
+void debug_sensors() {
+  if (qti_is_white(qti_sensor1) == LOW) {
+    Serial.print("QTI1 sees white ");
+  } else {
+    Serial.print("QTI1 sees black ");
+  }
+
+  if (qti_is_white(qti_sensor2) == LOW) {
+    Serial.print(" | QTI2 sees white ");
+  } else {
+    Serial.print("| QTI2 sees black ");
+  }
+
+  if (digitalRead(blue_sensor1) == LOW) {
+    Serial.print(" | Blue1 sensor detected ");
+  } else {
+    Serial.print(" | Blue1 undetected ");
+  }
+
+  if (digitalRead(blue_sensor2) == LOW) {
+    Serial.print(" | Blue2 sensor detected\n");
+  } else {
+    Serial.print(" | Blue2 sensor undetected\n");
+  }
+}
+
 void loop() {
+  debug_sensors();
   /*
   int speed = 50;
-
   // Idea for avoiding the white boundary lines...
   //while (see_white(BACK)) {
   //  move_forward(speed, 1);
@@ -99,14 +124,6 @@ void loop() {
     //turn_left(speed, 1);
   }
   */
-  // TODO: how many sensors can we connect at once?? we're running out of 5v pins!
-  int sensorValue = digitalRead(irSensorPin);
-  if (sensorValue == LOW) {
-    Serial.println("Obstacle detected!");
-  } else {
-    Serial.println("No obstacle.");
-  }
-
   /*
   Ideas for strategies:
   - spin in a circle quickly towards the opponent
