@@ -104,8 +104,14 @@ void debug_sensors() {
   }
 }
 
+// Ok, sensors are working, motors are working.
+// TODO:
+// - CAD a better container
+// - Put the arduino and sensors in/around the container
+// - Profit
+
 void loop() {
-  debug_sensors();
+  //debug_sensors();
   /*
   int speed = 50;
   // Idea for avoiding the white boundary lines...
